@@ -168,6 +168,9 @@ if(typeof GM_xmlhttpRequest === "undefined"){
         var hostname = $x('.//span[@class="host"]/text()', link)[0].nodeValue;
         var host = document.createElement("div");
         host.setAttribute("class", "hostName");
+        var host_favicon = document.createElement("img");
+        host_favicon.setAttribute("src", "http://www.google.com/s2/u/0/favicons?domain=" + hostname.replace(/^\s+|\s+$/g, ''));
+        host.appendChild(host_favicon);
         host.appendChild(document.createTextNode(hostname));
         page.parentNode.insertBefore(host, page.nextSibling);
     
@@ -186,6 +189,22 @@ if(typeof GM_xmlhttpRequest === "undefined"){
             controls.appendChild(del);
         }
 
+        // text reader
+        var text = $x('.//a[contains(@class,"textButton")]', controls)[0];
+        if(text != undefined){
+            var textButton = document.createElement("a");
+            textButton.href = text.href;
+            textButton.innerHTML = "open in <em>Text Reader</em>";
+            textButton.addEventListener("click", function(ev){
+                ev.preventDefault();
+                top.location.href = this.href;
+            }, false);
+            var textButtonWrapper = document.createElement("div");
+            textButtonWrapper.setAttribute("class", "text-button");
+            textButtonWrapper.appendChild(textButton);
+            var tableViewCellTitleLink = $x('.//*[@class="titleRow"]/a[@class="tableViewCellTitleLink"]', link)[0];
+            tableViewCellTitleLink.appendChild(textButtonWrapper);
+        }
 
         // starring
         var unstarred = $x('.//*[@class="starToggleUnstarred"]', link)[0];
@@ -257,7 +276,7 @@ if(typeof GM_xmlhttpRequest === "undefined"){
     // put a 'New'-flag on new links from within the last three days. 
     // For this the RSS feed is parsed.
     //
-	var timeslot = 1000*60*60*24*3;
+    var timeslot = 1000*60*60*24*3;
 	
     var parseRssFeed = function(response){
         if (!response.responseXML) {
@@ -331,8 +350,9 @@ if(typeof GM_xmlhttpRequest === "undefined"){
     //
     // HELVETAPAPER CSS-STYLES
     //
-    // used typographic scale [px]: 12, 14, 16, 24, 30, 36, 48, 120
-    // used color scheme: #FFFFFF, #F2F2F2, #E2E2E2, #BBBBBB, #444444, #FF2200
+    // typographic scale:  12px, 14px, 16px, 24px, 30px, 36px, 48px, 120px
+    // color scheme:       #FFFFFF, #F2F2F2, #E2E2E2, #BBBBBB, #444444, #FF2200
+    // font stack:         "helvetica neue", helvetica, arial, sans-serif
     //
 
     // OS/UA detection
@@ -340,19 +360,20 @@ if(typeof GM_xmlhttpRequest === "undefined"){
     if (navigator.appVersion.indexOf('Mac') != -1 && navigator.userAgent.indexOf('Firefox') != -1) os_ua = 'OSX_FF';
     
     // OS/UA specific CSS corrections
-    var new_padding =          (os_ua == 'OSX_FF') ? 'padding:5px 10px 1px' : 'padding:2px 10px 1px';
-    var sup_padding =          (os_ua == 'OSX_FF') ? 'padding:5px 8px 0' : 'padding:1px 8px';
-    var categorylink_padding = (os_ua == 'OSX_FF') ? 'padding:3px 8px' : 'padding:0px 8px 3px';
+    var new_padding =          (os_ua == 'OSX_FF') ? 'padding:2px 10px' : 'padding:2px 10px 1px';
+    var categorylink_padding = (os_ua == 'OSX_FF') ? 'padding:0 8px 5px' : 'padding:0px 8px 3px';
     var star_size =            (os_ua == 'OSX_FF') ? 'font-size:32px' : 'font-size:28px';
 
     // center!
     var content_width = 760;  // for 1024 screens
     var gap = ((window.innerWidth - content_width) * 0.5).toFixed(0);
 
-    var css = ''+
-    'body{background:#FFF;color:#444;line-height:1.5;font-family:Helvetica,sans-serif;width:100% !important;margin:0;padding:0;border-top:12px solid #F2F2F2;}'+
+    var font_stack = '"helvetica neue",helvetica,arial,sans-serif';
 
-    'h1#logo{font-weight:bold;font-size:120px;line-height:1;font-family:Helvetica,sans-serif;border:none;letter-spacing:-4px;margin:0;padding:20px 0 20px '+(gap-10)+'px;}'+
+    var css = ''+
+    'body{background:#FFF;color:#444;line-height:1.5;font-family:'+font_stack+';width:100% !important;margin:0;padding:0;border-top:12px solid #F2F2F2;}'+
+
+    'h1#logo{font-weight:bold;font-size:120px;line-height:1;font-family:'+font_stack+';border:none;letter-spacing:-4px;margin:0;padding:20px 0 20px '+(gap-10)+'px;}'+
     'h1#logo a{color:#F2F2F2;background:#FFF;text-decoration:none;outline:none;text-shadow:0px 1px 0px #BBB;}'+
 
     '#header{margin-bottom:0;border-top:1px solid #E2E2E2;}'+
@@ -363,11 +384,11 @@ if(typeof GM_xmlhttpRequest === "undefined"){
     '#header div#userdata a:hover{text-decoration:none;background:#F20;color:#FFF;padding:2px 0 2px 8px;margin:-2px 0 -2px -8px;}'+
 
     '#content{overflow:hidden;padding-top:10px;}'+
-    '#content h2#categoryHeader{color:#444;font-weight:bold;font-size:36px;line-height:1.5;font-family:Helvetica,sans-serif;letter-spacing:-1px;margin:0 0 30px '+(gap)+'px;float:none;}'+
+    '#content h2#categoryHeader{color:#444;font-weight:bold;font-size:36px;line-height:1.5;font-family:'+font_stack+';letter-spacing:-1px;margin:0 0 30px '+(gap)+'px;float:none;}'+
     '#content h2#categoryHeader span,h2#categoryHeader a{display:none}'+
-    '#content h2#categoryHeader sup{-moz-border-radius:10px;-webkit-border-radius:10px;font-size:28px;background:#BBB;color:#FFF;font-weight:normal;letter-spacing:0;margin-left:-6px;'+(sup_padding)+';}'+
+    '#content h2#categoryHeader sup{-moz-border-radius:10px;-webkit-border-radius:10px;font-size:28px;background:#BBB;color:#FFF;font-weight:normal;letter-spacing:0;margin-left:-6px;padding:1px 8px;}'+
     '#content h2#categoryHeader div{display:inline-block;margin-left:20px;}'+
-    '#content h2#categoryHeader div.categorylink a{color:#F20;display:block;font-size:30px;font-family:Helvetica,sans-serif;letter-spacing:0;height:30px;line-height:1.2;'+(categorylink_padding)+';outline:none;}'+
+    '#content h2#categoryHeader div.categorylink a{color:#F20;display:block;font-size:30px;font-family:'+font_stack+';letter-spacing:0;height:30px;line-height:1.2;'+(categorylink_padding)+';outline:none;}'+
     '#content h2#categoryHeader div.categorylink a:hover{text-decoration:none;background:#F20;color:#FFF;}'+
     '#content h2#categoryHeader div.categorylink a sup{background:#FAA;color:#FFF;font-size:24px;display:inline-block;margin:-14px -2px 0 3px;}'+
 
@@ -379,31 +400,40 @@ if(typeof GM_xmlhttpRequest === "undefined"){
     'div#bookmark_list .cornerControls{margin-top:2px;}'+
     'div#bookmark_list .cornerControls .textButton{display:none;}'+
 
-    'div#bookmark_list .cornerControls a{font-weight:bold;font-size:16px;line-height:1.1;font-family:Helvetica,sans-serif;color:#F20;width:100px;margin:0;background:transparent;border:none;display:inline-block;padding:5px;text-align:left;color:#F2F2F2 !important;outline:none;}'+
+    'div#bookmark_list .cornerControls a{font-weight:bold;font-size:16px;line-height:1.1;font-family:'+font_stack+';color:#F20;width:100px;margin:0;background:transparent;border:none;display:inline-block;padding:5px;text-align:left;color:#F2F2F2 !important;outline:none;}'+
     'div#bookmark_list .tableViewCell:hover .cornerControls a:hover{text-decoration:none;background:#F20;color:#FFF !important;padding:7px 13px 5px;margin:-2px -8px 0px;}'+
 
     'div#bookmark_list .starBox{float:right;display:none;}'+
 
-    'div#bookmark_list .titleUrl{font-weight:bold;font-size:24px;line-height:1.1;font-family:Helvetica,sans-serif;color:#BBB;width:none;margin:0 0 20px '+(2*gap)+'px;display:block;}'+
+    'div#bookmark_list .titleUrl{font-weight:bold;font-size:24px;line-height:1.1;font-family:'+font_stack+';color:#BBB;width:none;margin:0 0 20px '+(2*gap)+'px;display:block;}'+
     'div#bookmark_list .titleUrl{display:none;}'+
-    'div#bookmark_list .hostName{font-weight:bold;font-size:21px;line-height:1.2;font-family:Helvetica,sans-serif;color:#BBB;width:none;margin:0 0 14px '+(2*gap)+'px;display:block;}'+
+    'div#bookmark_list .hostName{font-weight:bold;font-size:21px;line-height:1.2;font-family:'+font_stack+';color:#BBB;width:none;margin:4px 0 14px '+(2*gap)+'px;display:block;}'+
+    'div#bookmark_list .hostName img{margin-right:5px;-moz-border-radius:4px;-webkit-border-radius:4px;}'+
     'div#bookmark_list .tableViewCell:hover .cornerControls a{color:#F20 !important;-moz-border-radius:0;-webkit-border-radius:0;}'+
 
     'div#bookmark_list #tableViewCell0 div{color:#444;padding-top:6px;font-size:36px;margin-top:0 !important;}'+
 
     'div#bookmark_list .titleRow{width:100%;margin-left:-'+(gap)+'px;padding:0;position:relative;}'+
     'div#bookmark_list .titleRow div.pagelink{width:none;margin-left:190px;display:inline;}'+
-    'div#bookmark_list .titleRow a.starToggleStarred{'+(star_size)+';line-height:1.1;font-family:Helvetica,sans-serif;color:#F20;width:none;display:inline;position:absolute;left:'+(2*gap-50)+'px;top:15px;outline:none;}'+
+    'div#bookmark_list .titleRow a.starToggleStarred{'+(star_size)+';line-height:1.1;font-family:'+font_stack+';color:#F20;width:none;display:inline;position:absolute;left:'+(2*gap-50)+'px;top:11px;outline:none;}'+
     'div#bookmark_list .titleRow a.starToggleStarred:hover{text-decoration:none;}'+
-    'div#bookmark_list .titleRow a.starToggleUnstarred{'+(star_size)+';line-height:1.1;font-family:Helvetica,sans-serif;color:#BBB;width:none;display:inline;position:absolute;left:'+(2*gap-50)+'px;top:15px;outline:none;}'+
-    'div#bookmark_list .titleRow a.starToggleProgress{display:inline;position:absolute;left:'+(2*gap-50)+'px;top:19px;outline:none;}'+
+    'div#bookmark_list .titleRow a.starToggleUnstarred{'+(star_size)+';line-height:1.1;font-family:'+font_stack+';color:#BBB;width:none;display:inline;position:absolute;left:'+(2*gap-50)+'px;top:11px;outline:none;}'+
+    'div#bookmark_list .titleRow a.starToggleProgress{display:inline;position:absolute;left:'+(2*gap-50)+'px;top:21px;outline:none;}'+
     'div#bookmark_list .titleRow a.starToggleProgress img{display:none;}'+
     'div#bookmark_list .tableViewCell:hover .titleRow a.starToggleUnstarred:hover{text-decoration:none;color:#F20;}'+
-    'div#bookmark_list .titleRow a.tableViewCellTitleLink{font-weight:bold;font-size:21px;line-height:1.2;font-family:Helvetica,sans-serif;color:#444;width:none;display:block;margin:21px 0 0 '+(2*gap)+'px;outline:none;}'+
+    'div#bookmark_list .titleRow a.tableViewCellTitleLink{font-weight:bold;font-size:21px;line-height:1.2;font-family:'+font_stack+';color:#444;width:none;display:inline-block;margin:18px 0 0 '+(2*gap)+'px;outline:none;}'+
     'div#bookmark_list .titleRow a.tableViewCellTitleLink:hover{text-decoration:none;}'+
 
     'div#bookmark_list .tableViewCell:hover .titleRow a.tableViewCellTitleLink{text-decoration:none;color:#F20;}'+
     'div#bookmark_list .titleRow a.tableViewCellTitleLink span.new{-moz-border-radius:10px;-webkit-border-radius:10px;background:#444;color:#FFF;'+(new_padding)+';}'+
+    'div#bookmark_list .titleRow a.tableViewCellTitleLink .text-button{display:none;position:absolute;width:240px;}'+
+    'div#bookmark_list .titleRow a.tableViewCellTitleLink .text-button a{margin-left:16px;color:#BBB;}'+
+    'div#bookmark_list .titleRow a.tableViewCellTitleLink:hover .text-button{display:inline;}'+
+    'div#bookmark_list .titleRow a.tableViewCellTitleLink .text-button a:hover{text-decoration:none;}'+
+    'div#bookmark_list .titleRow a.tableViewCellTitleLink .text-button a em{font-style:normal;}'+
+    'div#bookmark_list .titleRow a.tableViewCellTitleLink .text-button a em:after{content:" ?";}'+
+    'div#bookmark_list .titleRow a.tableViewCellTitleLink .text-button a:hover em:after{content:" !";}'+
+    'div#bookmark_list .titleRow a.tableViewCellTitleLink .text-button a:hover em{color:#444;}'+
     'div#bookmark_list .titleRow div.summary{display:none;}'+
     'div#bookmark_list .secondaryControls{display:none;}'+
 
@@ -422,9 +452,9 @@ if(typeof GM_xmlhttpRequest === "undefined"){
     '#feature_column .story .story-date .story-month{display:block;text-transform:uppercase;margin:-3px 22px 0 4px;text-align:right;}'+
     '#feature_column .story .story-date .story-year{-moz-transform:rotate(-90deg);-webkit-transform:rotate(-90deg);position:absolute;top:13px;right:-10px;font-size:21px;}'+
     '#feature_column .story .byline{display:none;}'+
-    '#feature_column .story h2 a{font-family:Helvetica,sans-serif;font-size:24px;color:#444;}'+
+    '#feature_column .story h2 a{font-family:'+font_stack+';font-size:24px;color:#444;}'+
     '#feature_column .story h2 a:hover{text-decoration:none;color:#F20;}'+
-    '#feature_column .story .summary p{font-family:Helvetica,sans-serif;font-size:16px;color:#444;font-style:normal;}'+
+    '#feature_column .story .summary p{font-family:'+font_stack+';font-size:16px;color:#444;font-style:normal;}'+
     '#feature_column .last-story{border-bottom:none;margin-bottom:0;}'+
     '';
 
@@ -439,6 +469,9 @@ if(typeof GM_xmlhttpRequest === "undefined"){
 // 2010-05-31 - 0.2 Smaller global font-size.
 // 2010-06-07 - 0.3 CSS adjustments for WinOS.
 // 2010-08-14 - 0.4 Fixes for Safari. Read page counts via Ajax-Requests for better performance.
+
+
+
 
 
 //

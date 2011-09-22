@@ -168,6 +168,9 @@ if(typeof GM_xmlhttpRequest === "undefined"){
         var hostname = $x('.//span[@class="host"]/text()', link)[0].nodeValue;
         var host = document.createElement("div");
         host.setAttribute("class", "hostName");
+        var host_favicon = document.createElement("img");
+        host_favicon.setAttribute("src", "http://www.google.com/s2/u/0/favicons?domain=" + hostname.replace(/^\s+|\s+$/g, ''));
+        host.appendChild(host_favicon);
         host.appendChild(document.createTextNode(hostname));
         page.parentNode.insertBefore(host, page.nextSibling);
     
@@ -405,6 +408,7 @@ if(typeof GM_xmlhttpRequest === "undefined"){
     'div#bookmark_list .titleUrl{font-weight:bold;font-size:24px;line-height:1.1;font-family:'+font_stack+';color:#BBB;width:none;margin:0 0 20px '+(2*gap)+'px;display:block;}'+
     'div#bookmark_list .titleUrl{display:none;}'+
     'div#bookmark_list .hostName{font-weight:bold;font-size:21px;line-height:1.2;font-family:'+font_stack+';color:#BBB;width:none;margin:4px 0 14px '+(2*gap)+'px;display:block;}'+
+    'div#bookmark_list .hostName img{margin-right:5px;-moz-border-radius:4px;-webkit-border-radius:4px;}'+
     'div#bookmark_list .tableViewCell:hover .cornerControls a{color:#F20 !important;-moz-border-radius:0;-webkit-border-radius:0;}'+
 
     'div#bookmark_list #tableViewCell0 div{color:#444;padding-top:6px;font-size:36px;margin-top:0 !important;}'+
